@@ -8,7 +8,7 @@ public class BangBangController implements UltrasonicController{
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
 	
 	private int filterControl;
-	private final int FILTER_OUT = 20;
+	private final int FILTER_OUT = 30;
 	
 	public BangBangController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 							  int bandCenter, int bandwidth, int motorLow, int motorHigh) {
@@ -65,7 +65,7 @@ public class BangBangController implements UltrasonicController{
 		
 		else if (distError > 0) {
 			
-			if (Math.abs (distError )< 20)
+			if (Math.abs (distError )< 30)
 			{
 				leftMotor.setSpeed (motorHigh);
 				rightMotor.setSpeed(motorLow);
@@ -90,7 +90,7 @@ public class BangBangController implements UltrasonicController{
 		else if (distError < 0) {
 	
 			
-			if (Math.abs (distError) < 20)
+			if (Math.abs (distError) < 30)
 			{
 				leftMotor.setSpeed (motorLow);
 				rightMotor.setSpeed(motorHigh);
