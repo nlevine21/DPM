@@ -7,8 +7,8 @@ public class BangBangController implements UltrasonicController{
 	private int distance;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
 	
-	private int filterControl;
-	private final int FILTER_OUT = 30;
+	private int filterControl; 
+	private final int FILTER_OUT = 20;
 	
 	public BangBangController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 							  int bandCenter, int bandwidth, int motorLow, int motorHigh) {
@@ -20,39 +20,15 @@ public class BangBangController implements UltrasonicController{
 		this.leftMotor = leftMotor;					//Speed of left motor
 		this.rightMotor = rightMotor;				// Speed of right motor
 		
-		leftMotor.setSpeed(motorHigh);				// Start robot moving forward
-		rightMotor.setSpeed(motorHigh);				
-		leftMotor.forward();
-		rightMotor.forward();
 		
 		filterControl = 0;
 	}
 	
 	@Override
 	public void processUSData(int distance) {
+	
 		this.distance = distance;
 		// TODO: process a movement based on the us distance passed in (BANG-BANG style)
-		
-		// rudimentary filter - toss out invalid samples corresponding to null
-		// signal.
-		// (n.b. this was not included in the Bang-bang controller, but easily
-		// could have).
-		//
-		if (distance >= 255 && filterControl < FILTER_OUT) {
-			// bad value, do not set the distance var, however do increment the
-			// filter value
-			filterControl++;
-		} else if (distance >= 255) {
-			// We have repeated large values, so there must actually be nothing
-			// there: leave the distance alone
-			this.distance = distance;
-		} else {
-			// distance went below 255: reset filter and leave
-			// distance alone.
-			filterControl = 0;
-			this.distance = distance;
-		}
-		
 		
 		int distError = bandCenter - distance; 		//Measured error from desired distance
 		
@@ -63,9 +39,9 @@ public class BangBangController implements UltrasonicController{
 			rightMotor.forward();
 		}
 		
-		else if (distError > 0) {
+		else if (distError > 0) { 
 			
-			if (Math.abs (distError )< 30)
+			if (Math.abs (distError )< 20)
 			{
 				leftMotor.setSpeed (motorHigh);
 				rightMotor.setSpeed(motorLow);
@@ -76,21 +52,22 @@ public class BangBangController implements UltrasonicController{
 			
 			else
 				
-			{
+			{ 
+			
 			leftMotor.setSpeed(motorHigh);
 			rightMotor.setSpeed(motorLow);
 			leftMotor.forward();
 			rightMotor.forward();
 			}
+		}
 			
 	
 				
-		}
 		
 		else if (distError < 0) {
 	
 			
-			if (Math.abs (distError) < 30)
+			if (Math.abs (distError) < 20)
 			{
 				leftMotor.setSpeed (motorLow);
 				rightMotor.setSpeed(motorHigh);
@@ -104,11 +81,12 @@ public class BangBangController implements UltrasonicController{
 			leftMotor.setSpeed(motorLow);
 			rightMotor.setSpeed(motorHigh);
 			leftMotor.forward();
-			rightMotor.forward();}
+			rightMotor.forward();
+			}
 		}
-		
-		
 	}
+		
+		
 
 	@Override
 	public int readUSDistance() {
