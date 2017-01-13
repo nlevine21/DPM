@@ -27,10 +27,31 @@ public class BangBangController implements UltrasonicController{
 	@Override
 	public void processUSData(int distance) {
 	
-		this.distance = distance;
+			
+		// rudimentary filter - toss out invalid samples corresponding to null
+				// signal.
+				// (n.b. this was not included in the Bang-bang controller, but easily
+				// could have).
+				//
+				if (distance >= 255 && filterControl < FILTER_OUT) {
+					// bad value, do not set the distance var, however do increment the
+					// filter value
+					filterControl++;
+				} else if (distance >= 255) {
+					// We have repeated large values, so there must actually be nothing
+					// there: leave the distance alone
+					this.distance = distance;
+				} else {
+					// distance went below 255: reset filter and leave
+					// distance alone.
+					filterControl = 0;
+					this.distance = distance;
+				}
+
+		
 		// TODO: process a movement based on the us distance passed in (BANG-BANG style)
 		
-		int distError = bandCenter - distance; 		//Measured error from desired distance
+		int distError = bandCenter - this.distance; 		//Measured error from desired distance
 		
 		if (Math.abs(distError) <= bandwidth) {
 			leftMotor.setSpeed(motorHigh);				

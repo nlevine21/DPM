@@ -12,10 +12,12 @@ public class PController implements UltrasonicController {
 	public PController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 					   int bandCenter, int bandwidth) {
 		//Default Constructor
-		this.bandCenter = bandCenter;
+		this.bandCenter = bandCenter - 5;
 		this.bandwidth = bandwidth;
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
+		
+		
 		leftMotor.setSpeed(motorStraight);					// Initalize motor rolling forward
 		rightMotor.setSpeed(motorStraight);
 		leftMotor.forward();
@@ -45,8 +47,60 @@ public class PController implements UltrasonicController {
 			filterControl = 0;
 			this.distance = distance;
 		}
-
-		// TODO: process a movement based on the us distance passed in (P style)
+		
+		
+		int distError = bandCenter - this.distance;
+		int k = 2;
+		
+		int speedFactor = Math.abs(k*distError);
+		
+		if (Math.abs(distError) <= bandwidth) {		// Within limits, same speed
+			leftMotor.setSpeed(motorStraight);		// Start moving forward
+			rightMotor.setSpeed(motorStraight);
+			leftMotor.forward();
+			rightMotor.forward();				
+		}
+		
+		else if (distError > 0) {					// Too close to the wall
+			
+			if (Math.abs (distError )< 20)
+			{
+				leftMotor.setSpeed (motorStraight+speedFactor);
+				rightMotor.setSpeed(motorStraight - speedFactor);
+				leftMotor.forward();
+				rightMotor.backward();
+				
+			}
+			
+			else {
+				
+			leftMotor.setSpeed(motorStraight+speedFactor);	//sets new speed
+			rightMotor.setSpeed(motorStraight-speedFactor);				//sets new speed
+			leftMotor.forward();
+			rightMotor.forward();		
+			}
+			
+		}
+		
+		else if (distError < 0) {
+			
+			if (Math.abs(distError) < 20) {
+				leftMotor.setSpeed (motorStraight - speedFactor);
+				rightMotor.setSpeed(motorStraight + speedFactor);
+				leftMotor.forward();
+				rightMotor.backward();
+			}
+			
+			else {
+				
+			
+			leftMotor.setSpeed(motorStraight-speedFactor); //keeps wheel moving straight
+			rightMotor.setSpeed(motorStraight+speedFactor); // sets new speed
+			leftMotor.forward();
+			rightMotor.forward();								
+			}	
+		}
+		
 	}
 
 	
