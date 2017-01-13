@@ -39,7 +39,7 @@ public class BangBangController implements UltrasonicController{
 		
 		else if (distError > 0) {
 			
-			if (Math.abs (distError )< 15)
+			if (Math.abs (distError )< 20)
 			{
 				leftMotor.setSpeed (motorHigh);
 				rightMotor.setSpeed(motorLow);
@@ -64,7 +64,7 @@ public class BangBangController implements UltrasonicController{
 		else if (distError < 0) {
 	
 			
-			if (Math.abs (distError) < 15)
+			if (Math.abs (distError) < 20)
 			{
 				leftMotor.setSpeed (motorLow);
 				rightMotor.setSpeed(motorHigh);
