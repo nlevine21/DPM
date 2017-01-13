@@ -38,17 +38,47 @@ public class BangBangController implements UltrasonicController{
 		}
 		
 		else if (distError > 0) {
+			
+			if (Math.abs (distError )< 15)
+			{
+				leftMotor.setSpeed (motorHigh);
+				rightMotor.setSpeed(motorLow);
+				leftMotor.forward();
+				rightMotor.backward();
+				
+			}
+			
+			else
+				
+			{
 			leftMotor.setSpeed(motorHigh);
 			rightMotor.setSpeed(motorLow);
 			leftMotor.forward();
-			rightMotor.forward();	
+			rightMotor.forward();
+			}
+			
+	
+				
 		}
 		
-		else if (distError > 0) {
+		else if (distError < 0) {
+	
+			
+			if (Math.abs (distError) < 15)
+			{
+				leftMotor.setSpeed (motorLow);
+				rightMotor.setSpeed(motorHigh);
+				leftMotor.backward();
+				rightMotor.forward();
+			}
+			
+			else
+				
+			{	
 			leftMotor.setSpeed(motorLow);
 			rightMotor.setSpeed(motorHigh);
 			leftMotor.forward();
-			rightMotor.forward();
+			rightMotor.forward();}
 		}
 		
 		
