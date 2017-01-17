@@ -1,3 +1,8 @@
+/*
+ * Noah Levine - 260684940
+ * Steven Cangul - 260744412
+ */
+
 package wallFollower;
 import lejos.hardware.motor.*;
 
@@ -55,12 +60,24 @@ public class BangBangController implements UltrasonicController{
 		
 		int distError = bandCenter - distance; 		//Measured error from desired distance
 		
+		
+		/* Evaluate whether the difference in distance is within the accepted error range. If it is in
+		 * the accepted range, we tell the robot to set both of its motors to the "motorHigh" speed
+		 * and forward direction.
+		 */
+		
 		if (Math.abs(distError) <= bandwidth) {
 			leftMotor.setSpeed(motorHigh);				
 			rightMotor.setSpeed(motorHigh);				
 			leftMotor.forward();
 			rightMotor.forward();
 		}
+		
+		
+		/* If the error in the distance is greater than zero, it signifies that the robot is too close to the wall.
+		 * To correct this, we would need to decrease the speed of the right wheel and increase the speed of the left wheel.
+		 */
+		
 		
 		else if (distError > 0) {
 			
@@ -75,23 +92,43 @@ public class BangBangController implements UltrasonicController{
 			
 			else {
 			
+				/* If the error in distance is less than 20, the bot is dangerously close to the wall. To correct this, the left motor
+				 * is set to "motorHigh" in the forward direction and the right motor is set to "motorLow" in the backwards
+				 * direction.
+				 */
+				
+				
 			if (Math.abs (distError )< 20)
 			{
 				leftMotor.setSpeed (motorHigh);
 				rightMotor.setSpeed(motorLow);
 				
-				if (Math.abs (distError) < 10)
+				
+				/* If the error in distance is less than 10, the bot is too close to the wall. A less aggressive approach is used.
+				 * The left motor is set to "motorHigh" in the forwards direction. However, the right motor is turned off to 
+				 * give it a greater turning radius.
+				 */
+				
+				
+					if (Math.abs (distError) < 10)
 				{
-					leftMotor.setSpeed(motorHigh);
-					rightMotor.setSpeed( 0 );
+							leftMotor.setSpeed(motorHigh);
+							rightMotor.setSpeed( 0 );
 				}
 				
+					
+					
 				leftMotor.forward();
 				rightMotor.backward();
 				
 				
 				
 			}
+			
+			
+			/* This is the least aggressive correction for when the bot is close. It gives the largest 
+			 * turning radius.
+			 */
 			
 			else
 				
@@ -106,23 +143,36 @@ public class BangBangController implements UltrasonicController{
 				
 		}
 		
+		
+		/* If the error in the distance is less than zero, it signifies that the robot is too far from the wall.
+		 * To correct this, we would need to accelerate the right wheel and decrease the speed of the left wheel.
+		 */
+		
 		else if (distError < 0) {
 	
+			
+			/* If the error is less than 20, use a less aggressive approach for the correction */
 			
 			if (Math.abs (distError) < 20)
 			{
 				leftMotor.setSpeed (motorLow);
 				rightMotor.setSpeed(motorHigh);
 				
-				if (Math.abs (distError) < 10)
+				// If the error is less than 10, use a more aggressive correction */
+				
+						if (Math.abs (distError) < 10)
 				{
-					leftMotor.setSpeed(0);
-					rightMotor.setSpeed( motorHigh );
+							leftMotor.setSpeed(0);
+							rightMotor.setSpeed( motorHigh );
 				}
 				
 				leftMotor.forward();
 				rightMotor.forward();
 			}
+			
+			/* If the error is greater than 20, use the least aggressive correction by setting the left wheel to
+			 * "motorLow" and the right wheel to "motorHigh". Both motors are moving in the forward direction.
+			 */
 			
 			else
 				
@@ -130,7 +180,8 @@ public class BangBangController implements UltrasonicController{
 			leftMotor.setSpeed(motorLow);
 			rightMotor.setSpeed(motorHigh);
 			leftMotor.forward();
-			rightMotor.forward();}
+			rightMotor.forward();
+			}
 		}
 		
 		
