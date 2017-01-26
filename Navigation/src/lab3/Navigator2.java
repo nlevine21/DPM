@@ -32,7 +32,8 @@ public class Navigator2 extends Thread{
 		SampleProvider usDistance = usSensor.getMode("Distance");	// usDistance provides samples from this instance
 		float[] usData = new float[usDistance.sampleSize()];		// usData is the buffer in which data are returned
 		
-			while (true) {
+		boolean go = true;
+			while (go) {
 			usDistance.fetchSample(usData,0);							// acquire data
 			distance=(int)(usData[0]*100.0);					// extract from buffer, cast to int						// now take action depending on value
 			try { Thread.sleep(50); } catch(Exception e){}		// Poor man's timed sampling
@@ -59,6 +60,7 @@ public class Navigator2 extends Thread{
 		 {
 				 travelTo(0,60);			 
 				 travelTo(60,0);
+				 go = false;
 	
 		
 		}
