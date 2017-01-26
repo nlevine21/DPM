@@ -24,6 +24,9 @@ public class Navigator2 extends Thread{
 		
 		odometer = odo;
 		
+	/* CONTROLLER
+	 * 
+	 * 	
 		PController p = new PController(leftMotor, rightMotor, bandCenter, bandWidth);
 		
 		@SuppressWarnings("resource")							    // Because we don't bother to close this resource
@@ -38,6 +41,7 @@ public class Navigator2 extends Thread{
 		
 		usPoller.start();
 		
+		*/
 		
 		// reset the motors
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
