@@ -8,6 +8,9 @@ import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.Port;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.hardware.sensor.SensorModes;
+import lejos.robotics.SampleProvider;
 
 public class Lab3 {
 	
@@ -28,8 +31,8 @@ public class Lab3 {
 		// some objects that need to be instantiated
 		
 		final TextLCD t = LocalEV3.get().getTextLCD();
-		Odometer odometer = new Odometer(leftMotor, rightMotor);
-		OdometerDisplay odometryDisplay = new OdometerDisplay(odometer,t);
+		final Odometer odometer = new Odometer(leftMotor, rightMotor);
+		final OdometerDisplay odometryDisplay = new OdometerDisplay(odometer,t);
 		
 		do {
 			// clear the display
@@ -38,15 +41,17 @@ public class Lab3 {
 			// ask the user whether the motors should drive in a square or float
 			t.drawString("< Left | Right >", 0, 0);
 			t.drawString("       |        ", 0, 1);
-			t.drawString(" Float | Drive  ", 0, 2);
-			t.drawString("motors | in a   ", 0, 3);
-			t.drawString("       | square ", 0, 4);
+			t.drawString(" Drive | Drive  ", 0, 2);
+			t.drawString(" along | along  ", 0, 3);
+			t.drawString(" path  | path   ", 0, 4);
+			t.drawString("       | with   ", 0, 5);
+			t.drawString("       | brick  ", 0, 6);
 
 			buttonChoice = Button.waitForAnyPress();
 		} while (buttonChoice != Button.ID_LEFT
 				&& buttonChoice != Button.ID_RIGHT);
 
-		if (buttonChoice == Button.ID_LEFT) {
+		if (buttonChoice == Button.ID_RIGHT) {
 			
 			leftMotor.forward();
 			leftMotor.flt();
@@ -56,18 +61,24 @@ public class Lab3 {
 			odometer.start();
 			odometryDisplay.start();
 			
+			// spawn a new Thread to avoid SquareDriver.drive() from blocking
+			(new Thread() {
+				public void run() {
+					Navigator2.drive(leftMotor, rightMotor, WHEEL_RADIUS, WHEEL_RADIUS, TRACK, odometer);
+				}
+			}).start();
+			
 		} else {
-			// start the odometer, the odometry display and (possibly) the
-			// odometry correction
+			
+			// start the odometer, the odometry display
 			
 			odometer.start();
 			odometryDisplay.start();
-			//odometryCorrection.start();
 
 			// spawn a new Thread to avoid SquareDriver.drive() from blocking
 			(new Thread() {
 				public void run() {
-					Navigator.drive(leftMotor, rightMotor, WHEEL_RADIUS, WHEEL_RADIUS, TRACK);
+					Navigator.drive(leftMotor, rightMotor, WHEEL_RADIUS, WHEEL_RADIUS, TRACK, odometer);
 				}
 			}).start();
 		}
@@ -75,4 +86,5 @@ public class Lab3 {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
 	}
+	
 }

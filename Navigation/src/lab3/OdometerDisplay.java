@@ -9,7 +9,7 @@ import lejos.hardware.lcd.TextLCD;
 
 public class OdometerDisplay extends Thread {
 	private static final long DISPLAY_PERIOD = 250;
-	public static Odometer odometer;
+	private static Odometer odometer;
 	private TextLCD t;
 
 	// constructor
