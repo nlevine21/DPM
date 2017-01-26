@@ -18,30 +18,29 @@ public class Navigator2 extends Thread{
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
 	private static final int bandWidth = 2;				// Width of dead band (cm)
 	private static final Port usPort = LocalEV3.get().getPort("S1");
+	private static int distance;
 
 	public static void drive(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			double leftRadius, double rightRadius, double width, Odometer odo) {
 		
 		odometer = odo;
 		
-	/* CONTROLLER
-	 * 
-	 * 	
-		PController p = new PController(leftMotor, rightMotor, bandCenter, bandWidth);
+
 		
 		@SuppressWarnings("resource")							    // Because we don't bother to close this resource
 		SensorModes usSensor = new EV3UltrasonicSensor(usPort);		// usSensor is the instance
 		SampleProvider usDistance = usSensor.getMode("Distance");	// usDistance provides samples from this instance
 		float[] usData = new float[usDistance.sampleSize()];		// usData is the buffer in which data are returned
 		
-		// Setup Ultrasonic Poller									// This thread samples the US and invokes
-		UltrasonicPoller usPoller = null;							// the selected controller on each cycle
-						
-		usPoller = new UltrasonicPoller(usDistance, usData, p);
+			while (true) {
+			usDistance.fetchSample(usData,0);							// acquire data
+			distance=(int)(usData[0]*100.0);					// extract from buffer, cast to int						// now take action depending on value
+			try { Thread.sleep(50); } catch(Exception e){}		// Poor man's timed sampling
 		
-		usPoller.start();
 		
-		*/
+		finally{
+		
+		
 		
 		// reset the motors
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
@@ -65,7 +64,9 @@ public class Navigator2 extends Thread{
 		}
 		
 		
+		}
 	}
+}
 
 	public static void travelTo (double x, double y){
 		
