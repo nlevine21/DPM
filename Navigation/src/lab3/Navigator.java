@@ -45,17 +45,12 @@ public class Navigator extends Thread{
 		double initY = odometer.getY();
 		
 		
-		if (i==1)
-			 Turnto (-63.435);
-		if (i==2)
-			 Turnto (153.435);
-		if (i==3)
-			Turnto(-90);
-		if (i==4)
-			 Turnto(-153.435);
-			
-		i++;
+		double angle = Math.atan2(x - initX, y - initY);
+		angle = angle*180/Math.PI;
+		angle = angle%180;
 		
+		turnTo(angle);
+	
 		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
 		Lab3.rightMotor.setSpeed(FORWARD_SPEED);
 		
@@ -70,22 +65,18 @@ public class Navigator extends Thread{
 	}
 	
 	
-	public static void Turnto (double theta){
+	public static void turnTo (double theta){
 		
-		double abs = Math.abs(theta);
+	
 		
 		Lab3.leftMotor.setSpeed(ROTATE_SPEED);
 		Lab3.rightMotor.setSpeed(ROTATE_SPEED);
 		
-		if (theta >=0){
-			Lab3.leftMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, abs), true);
-			Lab3.rightMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, abs), false);
-		}
-		else {
-			Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, abs), true);
-			Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, abs), false);
+		
+			Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), true);
+			Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), false);
 			
-		}
+		
 		
 		
 	}

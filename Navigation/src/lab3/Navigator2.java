@@ -19,7 +19,8 @@ public class Navigator2 extends Thread{
 	private static final int bandWidth = 2;				// Width of dead band (cm)
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 	private static int distance;
-
+	
+	
 	public static void drive(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			double leftRadius, double rightRadius, double width, Odometer odo) {
 		
@@ -32,14 +33,8 @@ public class Navigator2 extends Thread{
 		SampleProvider usDistance = usSensor.getMode("Distance");	// usDistance provides samples from this instance
 		float[] usData = new float[usDistance.sampleSize()];		// usData is the buffer in which data are returned
 		
-		boolean go = true;
-			while (go) {
-			usDistance.fetchSample(usData,0);							// acquire data
-			distance=(int)(usData[0]*100.0);					// extract from buffer, cast to int						// now take action depending on value
-			try { Thread.sleep(50); } catch(Exception e){}		// Poor man's timed sampling
+
 		
-		
-		finally{
 		
 		
 		
@@ -58,32 +53,36 @@ public class Navigator2 extends Thread{
 		}
 
 		 {
-				 travelTo(0,60);			 
-				 travelTo(60,0);
-				 go = false;
+			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData, leftMotor, rightMotor, Thread.currentThread());
+			 	 usPoller.start();
+			 	 
+			 	double angle;
+				angle = travelTo(0,60, 0);			 
+				angle = travelTo(60,0, angle);
 	
 		
 		}
 		
 		
 		}
-	}
-}
+	
 
-	public static void travelTo (double x, double y){
+
+	public static double travelTo (double x, double y, double previousAngle){
+		
 		
 		double initX = odometer.getX();
 		double initY = odometer.getY();
 		
-		
-		if (i==1)
-			 turnTo (0);
-		if (i==2)
-			 turnTo(-135);
-		i++;
+		double angle = Math.atan2(x - initX, y - initY);
+		angle = angle*180/Math.PI;
+
+		turnTo(90-previousAngle);
+		turnTo(angle);
 		
 		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
 		Lab3.rightMotor.setSpeed(FORWARD_SPEED);
+		
 		
 		double distance;
 		
@@ -92,6 +91,8 @@ public class Navigator2 extends Thread{
 
 		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
 		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), false);
+		
+		return angle;
 		
 	}
 	
