@@ -14,6 +14,7 @@ public class Navigator2 extends Thread{
 	private static final int ROTATE_SPEED = 150;
 	private static int i =1 ;
 	private static Odometer odometer;
+	private static double previousAngle = 0;
 	
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
 	private static final int bandWidth = 2;				// Width of dead band (cm)
@@ -56,9 +57,9 @@ public class Navigator2 extends Thread{
 			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData, leftMotor, rightMotor, Thread.currentThread());
 			 	 usPoller.start();
 			 	 
-			 	double angle;
-				angle = travelTo(0,60, 0);			 
-				angle = travelTo(60,0, angle);
+			 	
+				travelTo(0,60);			 
+				travelTo(60,0);
 	
 		
 		}
@@ -68,7 +69,7 @@ public class Navigator2 extends Thread{
 	
 
 
-	public static double travelTo (double x, double y, double previousAngle){
+	public static void travelTo (double x, double y){
 		
 		
 		double initX = odometer.getX();
@@ -77,7 +78,12 @@ public class Navigator2 extends Thread{
 		double angle = Math.atan2(x - initX, y - initY);
 		angle = angle*180/Math.PI;
 
-		turnTo(90-previousAngle);
+		if (Math.abs(previousAngle) >=180){
+			previousAngle = 360 - Math.abs(previousAngle);
+		}
+		
+		turnTo(-previousAngle);
+		previousAngle = angle;
 		turnTo(angle);
 		
 		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
@@ -91,8 +97,6 @@ public class Navigator2 extends Thread{
 
 		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
 		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), false);
-		
-		return angle;
 		
 	}
 	
