@@ -8,6 +8,7 @@ public class Navigator extends Thread{
 	private static final int ROTATE_SPEED = 150;
 	private static int i =1 ;
 	private static Odometer odometer;
+	private static double previousAngle = 0;
 
 	public static void drive(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			double leftRadius, double rightRadius, double width, Odometer odo) {
@@ -33,6 +34,7 @@ public class Navigator extends Thread{
 				 travelTo(30,30);
 				 travelTo(30,60);
 				 travelTo (60,0);
+				 
 		
 		}
 		
@@ -41,18 +43,24 @@ public class Navigator extends Thread{
 
 	public static void travelTo (double x, double y){
 		
+		
 		double initX = odometer.getX();
 		double initY = odometer.getY();
 		
-		
 		double angle = Math.atan2(x - initX, y - initY);
 		angle = angle*180/Math.PI;
-		angle = angle%180;
+
+		if (Math.abs(previousAngle) >=180){
+			previousAngle = 360 - Math.abs(previousAngle);
+		}
 		
+		turnTo(-previousAngle);
+		previousAngle = angle;
 		turnTo(angle);
-	
+		
 		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
 		Lab3.rightMotor.setSpeed(FORWARD_SPEED);
+		
 		
 		double distance;
 		
