@@ -16,7 +16,7 @@ public class Navigator2 extends Thread{
 	private static Odometer odometer;
 	private static double previousAngle = 0;
 	
-	private static final int bandCenter = 35;			// Offset from the wall (cm)
+	private static final int bandCenter = 25;			// Offset from the wall (cm)
 	private static final int bandWidth = 2;				// Width of dead band (cm)
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 	private static int distance;
@@ -54,7 +54,9 @@ public class Navigator2 extends Thread{
 		}
 
 		 {
-			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData, leftMotor, rightMotor, Thread.currentThread());
+			 
+			  	 BangBangController bang = new BangBangController(leftMotor, rightMotor, bandCenter, bandWidth, FORWARD_SPEED, FORWARD_SPEED/2); 	
+			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData, bang, Thread.currentThread());
 			 	 usPoller.start();
 			 	 
 			 	
@@ -67,7 +69,6 @@ public class Navigator2 extends Thread{
 		
 		}
 	
-
 
 	public static void travelTo (double x, double y){
 		
@@ -96,27 +97,23 @@ public class Navigator2 extends Thread{
 		distance = Math.pow(distance, 0.5);
 
 		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
-		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), false);
+		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
 		
 	}
 	
 	
 	public static void turnTo (double theta){
 		
-		double abs = Math.abs(theta);
+	
 		
 		Lab3.leftMotor.setSpeed(ROTATE_SPEED);
 		Lab3.rightMotor.setSpeed(ROTATE_SPEED);
 		
-		if (theta >=0){
-			Lab3.leftMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, abs), true);
-			Lab3.rightMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, abs), false);
-		}
-		else {
-			Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, abs), true);
-			Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, abs), false);
+		
+		Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), true);
+		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), true);
 			
-		}
+		
 		
 		
 	}
