@@ -45,17 +45,27 @@ public class Odometer extends Thread {
 			
 				double distL, distR, deltaD, deltaT, dX, dY;
 				
-				nowTachoL = leftMotor.getTachoCount();      		// get tacho counts
+				//Obtain old tachometer readers
+				nowTachoL = leftMotor.getTachoCount();      		
 				nowTachoR = rightMotor.getTachoCount();
-				distL = 3.14159*Lab2.WHEEL_RADIUS*(nowTachoL-lastTachoL)/180;		// compute L and R wheel displacements
+				
+				//compute displacements for left and right wheels
+				distL = 3.14159*Lab2.WHEEL_RADIUS*(nowTachoL-lastTachoL)/180;		
 				distR = 3.14159*Lab2.WHEEL_RADIUS*(nowTachoR-lastTachoR)/180;
-				lastTachoL=nowTachoL;								// save tacho counts for next iteration
+				
+				//save current tachometer counts for next iteration calculations
+				lastTachoL=nowTachoL;								
 				lastTachoR=nowTachoR;
-				deltaD = 0.5*(distL+distR);							// compute vehicle displacement
-				deltaT = (distL-distR)/Lab2.TRACK;							// compute change in heading
-														// update heading
-			    dX = deltaD * Math.sin(theta);						// compute X component of displacement
-				dY = deltaD * Math.cos(theta);						// compute Y component of displacement
+				
+				//compute robot center displacement
+				deltaD = 0.5*(distL+distR);		
+				
+				//compute angle robot is facing
+				deltaT = (distL-distR)/Lab2.TRACK;							
+														
+				//compute X and Y components of displacement
+			    dX = deltaD * Math.sin(theta);						
+				dY = deltaD * Math.cos(theta);						
 				
 			
 			
@@ -66,7 +76,9 @@ public class Odometer extends Thread {
 				 * Do not perform complex math
 				 * 
 				 */
-				x = x + dX;											// update estimates of X and Y position
+				
+				//Update x, y and theta readings
+				x = x + dX;											
 				y = y + dY;	
 				theta += deltaT;
 			}

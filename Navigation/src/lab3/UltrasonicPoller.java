@@ -22,10 +22,13 @@ public class UltrasonicPoller extends Thread{
 	private static final int bandwidth = 2;
 	private static final int bandCenter = 20;
 	
-	public UltrasonicPoller(SampleProvider us, float[] usData, Thread nav) {
+	private static Odometer odo;
+	
+	public UltrasonicPoller(SampleProvider us, float[] usData, Odometer odo, Thread nav) {
 		this.us = us;
 		this.usData = usData;
 		this.nav = nav;
+		this.odo = odo;
 	}
 
 //  Sensors now return floats using a uniform protocol.
@@ -49,15 +52,25 @@ public class UltrasonicPoller extends Thread{
 	}
 	
 	private void followWall() {
-		while (true) {
+		
+		boolean aroundWall = false;
+		while (!aroundWall) {
 			us.fetchSample(usData,0);							// acquire data
 			int distance=(int)(usData[0]*100.0);
-			bangBang(distance);
+			aroundWall = bangBang(distance);
 			try { Thread.sleep(50); } catch(Exception e){}
+		}
+		
+		if (Navigator2.onFirstPath) {
+			Navigator2.travelTo(0, 60);
+			Navigator2.travelTo(60, 0);
+		}
+		else {
+			Navigator2.travelTo(60, 0);
 		}
 	}
 	
-	private void bangBang(int distance) {
+	private boolean bangBang(int distance) {
 		int distError = bandCenter - distance; 		//Measured error from desired distance
 		
 		
@@ -73,7 +86,7 @@ public class UltrasonicPoller extends Thread{
 			Lab3.leftMotor.setSpeed(MOTOR_HIGH+MOTOR_LOW);
 			Lab3.rightMotor.setSpeed(MOTOR_LOW);
 			Lab3.leftMotor.forward();
-			Lab3.rightMotor.forward();
+			Lab3.rightMotor.backward();
 		}
 
 		
@@ -83,6 +96,29 @@ public class UltrasonicPoller extends Thread{
 			Lab3.leftMotor.forward();
 			Lab3.rightMotor.forward();
 		}
+		return isBackOnPath(odo.getX(), odo.getY());	
+		}
+	
+	
+	private boolean isBackOnPath (double x, double y) {
+	
+		if (Navigator2.onFirstPath) {
+			
+			if (Math.abs(x) <= 1) 
+				return true;
+			else 
+				return false;
+			
+		}
+		else {
+			int a = 1;
+			int b = 60;
+			
+			if(Math.abs(y-((a*x)+b)) <= 1)
+				return true;
+			else
+				return false;
+		}
+	
 	}
-
 }

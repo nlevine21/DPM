@@ -21,6 +21,8 @@ public class Navigator2 extends Thread{
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 	private static int distance;
 	
+	public static boolean onFirstPath = false;
+	
 	
 	public static void drive(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			double leftRadius, double rightRadius, double width, Odometer odo) {
@@ -55,11 +57,13 @@ public class Navigator2 extends Thread{
 
 		 {
 			 
-			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData, Thread.currentThread());
+			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData, odo, Thread.currentThread());
 			 	 usPoller.start();
 			 	 
-			 	
-				travelTo(0,60);			 
+			 	onFirstPath = true;
+				travelTo(0,60);	
+				
+				onFirstPath = false;
 				travelTo(60,0);
 	
 		
@@ -70,7 +74,6 @@ public class Navigator2 extends Thread{
 	
 
 	public static void travelTo (double x, double y){
-		
 		
 		double initX = odometer.getX();
 		double initY = odometer.getY();
