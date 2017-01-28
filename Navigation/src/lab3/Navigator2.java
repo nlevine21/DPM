@@ -55,8 +55,7 @@ public class Navigator2 extends Thread{
 
 		 {
 			 
-			  	 BangBangController bang = new BangBangController(leftMotor, rightMotor, bandCenter, bandWidth, FORWARD_SPEED, FORWARD_SPEED/2); 	
-			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData, bang, Thread.currentThread());
+			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData, Thread.currentThread());
 			 	 usPoller.start();
 			 	 
 			 	

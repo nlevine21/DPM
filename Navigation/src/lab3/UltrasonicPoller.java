@@ -14,18 +14,18 @@ import lejos.robotics.SampleProvider;
 
 
 public class UltrasonicPoller extends Thread{
-	private static final int FORWARD_SPEED = 250;
-	private static final int ROTATE_SPEED = 150;
+	private static final int MOTOR_HIGH = 150;
+	private static final int MOTOR_LOW = 75;
 	private SampleProvider us;
 	private float[] usData;
 	private static Thread nav;
-	private static UltrasonicController cont;
+	private static final int bandwidth = 2;
+	private static final int bandCenter = 20;
 	
-	public UltrasonicPoller(SampleProvider us, float[] usData, UltrasonicController cont, Thread nav) {
+	public UltrasonicPoller(SampleProvider us, float[] usData, Thread nav) {
 		this.us = us;
 		this.usData = usData;
 		this.nav = nav;
-		this.cont = cont;
 	}
 
 //  Sensors now return floats using a uniform protocol.
@@ -52,11 +52,37 @@ public class UltrasonicPoller extends Thread{
 		while (true) {
 			us.fetchSample(usData,0);							// acquire data
 			int distance=(int)(usData[0]*100.0);
-			cont.processUSData(distance);
-			try { Thread.sleep(50); } catch(Exception e){}		// Poor man's timed sampling
+			bangBang(distance);
+			try { Thread.sleep(50); } catch(Exception e){}
+		}
 	}
 	
-	
-	
+	private void bangBang(int distance) {
+		int distError = bandCenter - distance; 		//Measured error from desired distance
+		
+		
+		if (Math.abs(distError) <= bandwidth) {
+			Lab3.leftMotor.setSpeed(MOTOR_HIGH);				
+			Lab3.rightMotor.setSpeed(MOTOR_HIGH);				
+			Lab3.leftMotor.forward();
+			Lab3.rightMotor.forward();
+		}
+		
+		
+		else if (distError > 0) {
+			Lab3.leftMotor.setSpeed(MOTOR_HIGH+MOTOR_LOW);
+			Lab3.rightMotor.setSpeed(MOTOR_LOW);
+			Lab3.leftMotor.forward();
+			Lab3.rightMotor.forward();
+		}
+
+		
+		else if (distError < 0) { 
+			Lab3.leftMotor.setSpeed(MOTOR_LOW);
+			Lab3.rightMotor.setSpeed(MOTOR_HIGH+MOTOR_LOW);
+			Lab3.leftMotor.forward();
+			Lab3.rightMotor.forward();
+		}
 	}
+
 }
