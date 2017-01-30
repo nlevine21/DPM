@@ -2,6 +2,7 @@ package lab3;
 
 
 
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
@@ -12,16 +13,15 @@ import lejos.robotics.SampleProvider;
 public class Navigator2 extends Thread{
 	private static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
-	private static int i =1 ;
 	private static Odometer odometer;
 	private static double previousAngle = 0;
 	
-	private static final int bandCenter = 25;			// Offset from the wall (cm)
-	private static final int bandWidth = 2;				// Width of dead band (cm)
+	private static final int THRESHHOLD = 2;				// Width of dead band (cm)
 	private static final Port usPort = LocalEV3.get().getPort("S1");
-	private static int distance;
 	
-	public static boolean onFirstPath = false;
+	public static boolean onFirstPath = true;
+
+	
 	
 	
 	public static void drive(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
@@ -60,12 +60,12 @@ public class Navigator2 extends Thread{
 			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData, odo, Thread.currentThread());
 			 	 usPoller.start();
 			 	 
-			 	onFirstPath = true;
 				travelTo(0,60);	
 				
 				onFirstPath = false;
 				travelTo(60,0);
-	
+				
+
 		
 		}
 		
@@ -85,9 +85,8 @@ public class Navigator2 extends Thread{
 			previousAngle = 360 - Math.abs(previousAngle);
 		}
 		
-		turnTo(-previousAngle);
 		previousAngle = angle;
-		turnTo(angle);
+		turnTo(-previousAngle+angle);
 		
 		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
 		Lab3.rightMotor.setSpeed(FORWARD_SPEED);
@@ -101,6 +100,16 @@ public class Navigator2 extends Thread{
 		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
 		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
 		
+		while (true) {
+			double currentX = odometer.getX();
+			double currentY = odometer.getY();
+			
+			if (Math.abs(currentX - x) <= THRESHHOLD && Math.abs(currentY - y) <= THRESHHOLD) {
+				break;
+			}
+		}
+		
+
 	}
 	
 	
@@ -113,7 +122,8 @@ public class Navigator2 extends Thread{
 		
 		
 		Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), true);
-		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), true);
+		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), false);
+		
 			
 		
 		

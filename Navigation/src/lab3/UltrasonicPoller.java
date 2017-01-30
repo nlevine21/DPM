@@ -19,6 +19,8 @@ public class UltrasonicPoller extends Thread{
 	private SampleProvider us;
 	private float[] usData;
 	private static Thread nav;
+	private static double previousAngle = 0;
+	private boolean onFirstPath;
 
 	
 	private static Odometer odo;
@@ -43,40 +45,28 @@ public class UltrasonicPoller extends Thread{
 				
 				Lab3.leftMotor.stop(); Lab3.rightMotor.stop();
 				nav.interrupt();
-				followWall(distance);
+				goAroundWall(distance);
 				break;
 			}
 			try { Thread.sleep(50); } catch(Exception e){}		// Poor man's timed sampling
 		}
+		
+		travelTo(60,0);
+		
+		
 	}
 	
-	private void followWall(int distance) {
-		
-			goAroundWall(distance);
-		
-		
-		if (Navigator2.onFirstPath) {
-			Navigator2.travelTo(0, 60);
-			Navigator2.travelTo(60, 0);
-		}
-		else {
-			Navigator2.travelTo(60, 0);
-		}
-	}
-	
+
 	private void goAroundWall(int distance) {
-		Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 15.0), true);
-		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 15.0), false);
-		turnClockwise();
+		turnTo(15);
+		turnTo(90);
 		
 		for (int i=0; i<3; i++) {
 			
-		
-		while (true) {
 		int travelDist = 30;
 		
-		if (i==2) {
-			travelDist = travelDist + 2*distance;
+		if (i==1) {
+			travelDist =  15 + 2*distance;
 		}
 			
 		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
@@ -85,21 +75,13 @@ public class UltrasonicPoller extends Thread{
 		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, travelDist), true);
 		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, travelDist), false);
 		
-		turnCounterClockwise();
+		if (i<2) 
+			turnTo(-90);
 		
-		us.fetchSample(usData,0);							// acquire data
-		int distance2=(int)(usData[0]*100.0);
-		
-		if (distance2 < 20 && i<2) {
-			turnClockwise();
-			i--;
+		if (i==2) {
+			turnTo(90);
 		}
-		
-		if (i==3) {
-			turnClockwise();
-			break;
-		}
-	}
+	
 		
 		}
 		
@@ -107,28 +89,7 @@ public class UltrasonicPoller extends Thread{
 
 		}
 	
-	
-	private boolean isBackOnPath (double x, double y) {
-	
-		if (Navigator2.onFirstPath) {
-			
-			if (Math.abs(x) <= 1) 
-				return true;
-			else 
-				return false;
-			
-		}
-		else {
-			int a = 1;
-			int b = 60;
-			
-			if(Math.abs(y-((a*x)+b)) <= 1)
-				return true;
-			else
-				return false;
-		}
-	
-	}
+
 	
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
@@ -138,23 +99,50 @@ public class UltrasonicPoller extends Thread{
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 	
-	private static void turnClockwise() {
 
-		// turn 90 degrees clockwise
-		Lab3.leftMotor.setSpeed(ROTATE_SPEED);
-		Lab3.rightMotor.setSpeed(ROTATE_SPEED);
+	public static void travelTo (double x, double y){
+		
+		double initX = odo.getX();
+		double initY = odo.getY();
+		double previousAngle = odo.getTheta() * 180/Math.PI;
+		
+		double angle = Math.atan2(x - initX, y - initY);
+		angle = angle*180/Math.PI;
 
-		Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 90.0), true);
-		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 90.0), false);
+		/*if (Math.abs(previousAngle) >=180){
+			previousAngle = 360 - Math.abs(previousAngle);
+		}*/
+		
+		turnTo(-previousAngle+angle);
+		
+		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
+		Lab3.rightMotor.setSpeed(FORWARD_SPEED);
+		
+		
+		double distance;
+		
+		distance = Math.pow((x - initX),2) + Math.pow((y - initY),2);
+		distance = Math.pow(distance, 0.5);
+
+		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
+		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), false);
+		
 	}
 	
-	private static void turnCounterClockwise() {
-
-		// turn 90 degrees clockwise
+	
+	public static void turnTo (double theta){
+		
+	
+		
 		Lab3.leftMotor.setSpeed(ROTATE_SPEED);
 		Lab3.rightMotor.setSpeed(ROTATE_SPEED);
-
-		Lab3.leftMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 90.0), true);
-		Lab3.rightMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 90.0), false);
+		
+		
+		Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), true);
+		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), false);
+			
+		
+		
+		
 	}
 }

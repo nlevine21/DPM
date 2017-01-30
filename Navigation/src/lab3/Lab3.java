@@ -53,10 +53,6 @@ public class Lab3 {
 
 		if (buttonChoice == Button.ID_RIGHT) {
 			
-			leftMotor.forward();
-			leftMotor.flt();
-			rightMotor.forward();
-			rightMotor.flt();
 			
 			odometer.start();
 			odometryDisplay.start();
