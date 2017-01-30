@@ -20,12 +20,15 @@ public class Lab3 {
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
+	
+	//Initialize Odometer, Screen and Odometer Display
+	public static final Odometer odometer = new Odometer(leftMotor,rightMotor);
+	public static final TextLCD t = LocalEV3.get().getTextLCD();
+	public static final  OdometerDisplay odometryDisplay = new OdometerDisplay(odometer,t);
+	
 	// Constants
 	public static final double WHEEL_RADIUS = 2.05;
 	public static final double TRACK = 15.8;
-	public static final Odometer odometer = new Odometer(leftMotor,rightMotor);
-	public final static TextLCD t = LocalEV3.get().getTextLCD();
-	public final static OdometerDisplay odometryDisplay = new OdometerDisplay(odometer,t);
 
 
 	public static void main(String[] args) {
@@ -36,7 +39,7 @@ public class Lab3 {
 			// clear the display
 			t.clear();
 
-			// ask the user whether the motors should drive in a square or float
+			// ask the user whether the robot should follow path 1 or 2. (without/with avoidance)
 			t.drawString("< Left | Right >", 0, 0);
 			t.drawString("       |        ", 0, 1);
 			t.drawString(" Drive | Drive  ", 0, 2);
@@ -49,13 +52,16 @@ public class Lab3 {
 		} while (buttonChoice != Button.ID_LEFT
 				&& buttonChoice != Button.ID_RIGHT);
 
+		
+		
 		if (buttonChoice == Button.ID_RIGHT) {
 			
 			
+			//Start the odometer and odemeter display
 			odometer.start();
 			odometryDisplay.start();
 			
-			// spawn a new Thread to avoid SquareDriver.drive() from blocking
+			// spawn a new Thread starting the second navigator
 			(new Thread() {
 				public void run() {
 					Navigator2.drive(leftMotor, rightMotor, WHEEL_RADIUS, WHEEL_RADIUS, TRACK);
@@ -64,12 +70,11 @@ public class Lab3 {
 			
 		} else {
 			
-			// start the odometer, the odometry display
-			
+			// start the odometer and the odometry display
 			odometer.start();
 			odometryDisplay.start();
 
-			// spawn a new Thread to avoid SquareDriver.drive() from blocking
+			// spawn a new Thread starting the first navigator
 			(new Thread() {
 				public void run() {
 					Navigator.drive(leftMotor, rightMotor, WHEEL_RADIUS, WHEEL_RADIUS, TRACK);
@@ -77,6 +82,8 @@ public class Lab3 {
 			}).start();
 		}
 		
+		
+		//If a button is pressed, terminate the program
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
 	}

@@ -12,6 +12,7 @@ import lejos.robotics.SampleProvider;
 
 public class Navigator2 extends Thread{
 	
+	//Port needed for sensor
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 	
 
@@ -22,16 +23,11 @@ public class Navigator2 extends Thread{
 			double leftRadius, double rightRadius, double width) {
 		
 
-		
+		//Set up sensor
 		@SuppressWarnings("resource")							    // Because we don't bother to close this resource
 		SensorModes usSensor = new EV3UltrasonicSensor(usPort);		// usSensor is the instance
 		SampleProvider usDistance = usSensor.getMode("Distance");	// usDistance provides samples from this instance
 		float[] usData = new float[usDistance.sampleSize()];		// usData is the buffer in which data are returned
-		
-
-		
-		
-		
 		
 		// reset the motors
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
@@ -49,11 +45,12 @@ public class Navigator2 extends Thread{
 
 		 {
 			 
-			 	 UltrasonicPoller usPoller = new UltrasonicPoller(usDistance, usData,Thread.currentThread());
-			 	 usPoller.start();
+			 	//Create a new ObjectAvoider thread which will check for objects obstructing the path. Start the thread
+			 	 ObjectAvoider avoider = new ObjectAvoider(usDistance, usData,Thread.currentThread());
+			 	 avoider.start();
 			 	 
+			 	//Travel to requested locations 
 				Navigator.travelTo(0,60);	
-			
 				Navigator.travelTo(60,0);
 				
 
