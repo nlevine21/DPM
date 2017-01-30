@@ -9,7 +9,7 @@ public class ObjectAvoider extends Thread{
 	//Constants
 	private static final int FORWARD_SPEED = 200;
 	private static final int OBJECT_CLOSE_DISTANCE = 20;
-	private static final int OBJECT_LENGTH = 25;
+	private static final int OBJECT_LENGTH = 30;
 	private static final int OBJECT_WIDTH = 15;
 	
 	//Sensor data
