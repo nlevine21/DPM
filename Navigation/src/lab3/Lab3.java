@@ -21,8 +21,8 @@ public class Lab3 {
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
 	// Constants
-	public static final double WHEEL_RADIUS = 2.075;
-	public static final double TRACK = 15.6;
+	public static final double WHEEL_RADIUS = 2.05;
+	public static final double TRACK = 15.8;
 	public static final double SENSOR_DIST = 5;
 
 	public static void main(String[] args) {

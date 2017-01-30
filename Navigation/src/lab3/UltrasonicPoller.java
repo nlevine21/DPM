@@ -14,13 +14,12 @@ import lejos.robotics.SampleProvider;
 
 
 public class UltrasonicPoller extends Thread{
-	private static final int MOTOR_HIGH = 150;
-	private static final int MOTOR_LOW = 75;
+	private static final int FORWARD_SPEED = 200;
+	private static final int ROTATE_SPEED = 100;
 	private SampleProvider us;
 	private float[] usData;
 	private static Thread nav;
-	private static final int bandwidth = 2;
-	private static final int bandCenter = 20;
+
 	
 	private static Odometer odo;
 	
@@ -44,22 +43,17 @@ public class UltrasonicPoller extends Thread{
 				
 				Lab3.leftMotor.stop(); Lab3.rightMotor.stop();
 				nav.interrupt();
-				followWall();
+				followWall(distance);
 				break;
 			}
 			try { Thread.sleep(50); } catch(Exception e){}		// Poor man's timed sampling
 		}
 	}
 	
-	private void followWall() {
+	private void followWall(int distance) {
 		
-		boolean aroundWall = false;
-		while (!aroundWall) {
-			us.fetchSample(usData,0);							// acquire data
-			int distance=(int)(usData[0]*100.0);
-			aroundWall = bangBang(distance);
-			try { Thread.sleep(50); } catch(Exception e){}
-		}
+			goAroundWall(distance);
+		
 		
 		if (Navigator2.onFirstPath) {
 			Navigator2.travelTo(0, 60);
@@ -70,33 +64,47 @@ public class UltrasonicPoller extends Thread{
 		}
 	}
 	
-	private boolean bangBang(int distance) {
-		int distError = bandCenter - distance; 		//Measured error from desired distance
+	private void goAroundWall(int distance) {
+		Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 15.0), true);
+		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 15.0), false);
+		turnClockwise();
 		
+		for (int i=0; i<3; i++) {
+			
 		
-		if (Math.abs(distError) <= bandwidth) {
-			Lab3.leftMotor.setSpeed(MOTOR_HIGH);				
-			Lab3.rightMotor.setSpeed(MOTOR_HIGH);				
-			Lab3.leftMotor.forward();
-			Lab3.rightMotor.forward();
+		while (true) {
+		int travelDist = 30;
+		
+		if (i==2) {
+			travelDist = travelDist + 2*distance;
 		}
-		
-		
-		else if (distError > 0) {
-			Lab3.leftMotor.setSpeed(MOTOR_HIGH+MOTOR_LOW);
-			Lab3.rightMotor.setSpeed(MOTOR_LOW);
-			Lab3.leftMotor.forward();
-			Lab3.rightMotor.backward();
-		}
+			
+		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
+		Lab3.rightMotor.setSpeed(FORWARD_SPEED);
 
+		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, travelDist), true);
+		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, travelDist), false);
 		
-		else if (distError < 0) { 
-			Lab3.leftMotor.setSpeed(MOTOR_LOW);
-			Lab3.rightMotor.setSpeed(MOTOR_HIGH+MOTOR_LOW);
-			Lab3.leftMotor.forward();
-			Lab3.rightMotor.forward();
+		turnCounterClockwise();
+		
+		us.fetchSample(usData,0);							// acquire data
+		int distance2=(int)(usData[0]*100.0);
+		
+		if (distance2 < 20 && i<2) {
+			turnClockwise();
+			i--;
 		}
-		return isBackOnPath(odo.getX(), odo.getY());	
+		
+		if (i==3) {
+			turnClockwise();
+			break;
+		}
+	}
+		
+		}
+		
+		
+
 		}
 	
 	
@@ -120,5 +128,33 @@ public class UltrasonicPoller extends Thread{
 				return false;
 		}
 	
+	}
+	
+	private static int convertDistance(double radius, double distance) {
+		return (int) ((180.0 * distance) / (Math.PI * radius));
+	}
+
+	private static int convertAngle(double radius, double width, double angle) {
+		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+	
+	private static void turnClockwise() {
+
+		// turn 90 degrees clockwise
+		Lab3.leftMotor.setSpeed(ROTATE_SPEED);
+		Lab3.rightMotor.setSpeed(ROTATE_SPEED);
+
+		Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 90.0), true);
+		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 90.0), false);
+	}
+	
+	private static void turnCounterClockwise() {
+
+		// turn 90 degrees clockwise
+		Lab3.leftMotor.setSpeed(ROTATE_SPEED);
+		Lab3.rightMotor.setSpeed(ROTATE_SPEED);
+
+		Lab3.leftMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 90.0), true);
+		Lab3.rightMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, 90.0), false);
 	}
 }
