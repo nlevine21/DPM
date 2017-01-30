@@ -15,21 +15,16 @@ import lejos.robotics.SampleProvider;
 
 public class UltrasonicPoller extends Thread{
 	private static final int FORWARD_SPEED = 200;
-	private static final int ROTATE_SPEED = 100;
 	private SampleProvider us;
 	private float[] usData;
 	private static Thread nav;
-	private static double previousAngle = 0;
-	private boolean onFirstPath;
+	
 
 	
-	private static Odometer odo;
-	
-	public UltrasonicPoller(SampleProvider us, float[] usData, Odometer odo, Thread nav) {
+	public UltrasonicPoller(SampleProvider us, float[] usData, Thread nav) {
 		this.us = us;
 		this.usData = usData;
 		this.nav = nav;
-		this.odo = odo;
 	}
 
 //  Sensors now return floats using a uniform protocol.
@@ -51,15 +46,15 @@ public class UltrasonicPoller extends Thread{
 			try { Thread.sleep(50); } catch(Exception e){}		// Poor man's timed sampling
 		}
 		
-		travelTo(60,0);
+		Navigator.travelTo(60,0);
 		
 		
 	}
 	
 
 	private void goAroundWall(int distance) {
-		turnTo(15);
-		turnTo(90);
+		Navigator.turnTo(15);
+		Navigator.turnTo(90);
 		
 		for (int i=0; i<3; i++) {
 			
@@ -69,80 +64,24 @@ public class UltrasonicPoller extends Thread{
 			travelDist =  15 + 2*distance;
 		}
 			
-		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
-		Lab3.rightMotor.setSpeed(FORWARD_SPEED);
-
-		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, travelDist), true);
-		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, travelDist), false);
+		travelForward(travelDist);
 		
 		if (i<2) 
-			turnTo(-90);
-		
-		if (i==2) {
-			turnTo(90);
-		}
-	
+			Navigator.turnTo(-90);
+		else
+			Navigator.turnTo(90);
 		
 		}
 		
-		
-
-		}
-	
-
-	
-	private static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
-	}
-
-	private static int convertAngle(double radius, double width, double angle) {
-		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 	
-
-	public static void travelTo (double x, double y){
-		
-		double initX = odo.getX();
-		double initY = odo.getY();
-		double previousAngle = odo.getTheta() * 180/Math.PI;
-		
-		double angle = Math.atan2(x - initX, y - initY);
-		angle = angle*180/Math.PI;
-
-		/*if (Math.abs(previousAngle) >=180){
-			previousAngle = 360 - Math.abs(previousAngle);
-		}*/
-		
-		turnTo(-previousAngle+angle);
-		
+	private static void travelForward(int distance) {
 		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
 		Lab3.rightMotor.setSpeed(FORWARD_SPEED);
-		
-		
-		double distance;
-		
-		distance = Math.pow((x - initX),2) + Math.pow((y - initY),2);
-		distance = Math.pow(distance, 0.5);
 
-		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
-		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), false);
+		Lab3.leftMotor.rotate(Navigator.convertDistance(Lab3.WHEEL_RADIUS, distance), true);
+		Lab3.rightMotor.rotate(Navigator.convertDistance(Lab3.WHEEL_RADIUS, distance), false);
 		
 	}
-	
-	
-	public static void turnTo (double theta){
-		
-	
-		
-		Lab3.leftMotor.setSpeed(ROTATE_SPEED);
-		Lab3.rightMotor.setSpeed(ROTATE_SPEED);
-		
-		
-		Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), true);
-		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), false);
-			
-		
-		
-		
-	}
+
 }

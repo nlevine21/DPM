@@ -6,14 +6,11 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 public class Navigator extends Thread{
 	private static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
-	private static int i =1 ;
-	private static Odometer odometer;
-	private static double previousAngle = 0;
+	private static final int THRESHHOLD = 2;
 
 	public static void drive(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-			double leftRadius, double rightRadius, double width, Odometer odo) {
+			double leftRadius, double rightRadius, double width) {
 		
-		odometer = odo;
 		
 		// reset the motors
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
@@ -43,9 +40,9 @@ public class Navigator extends Thread{
 
 	public static void travelTo (double x, double y){
 		
-		
-		double initX = odometer.getX();
-		double initY = odometer.getY();
+		double initX = Lab3.odometer.getX();
+		double initY = Lab3.odometer.getY();
+		double previousAngle = Lab3.odometer.getTheta() * 180/Math.PI;
 		
 		double angle = Math.atan2(x - initX, y - initY);
 		angle = angle*180/Math.PI;
@@ -54,9 +51,7 @@ public class Navigator extends Thread{
 			previousAngle = 360 - Math.abs(previousAngle);
 		}
 		
-		turnTo(-previousAngle);
-		previousAngle = angle;
-		turnTo(angle);
+		turnTo (-previousAngle +angle);
 		
 		Lab3.leftMotor.setSpeed(FORWARD_SPEED);
 		Lab3.rightMotor.setSpeed(FORWARD_SPEED);
@@ -68,29 +63,34 @@ public class Navigator extends Thread{
 		distance = Math.pow(distance, 0.5);
 
 		Lab3.leftMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
-		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), false);
+		Lab3.rightMotor.rotate(convertDistance(Lab3.WHEEL_RADIUS, distance), true);
 		
+		while (true) {
+			double currentX = Lab3.odometer.getX();
+			double currentY = Lab3.odometer.getY();
+			
+			if (Math.abs(currentX - x) <= THRESHHOLD && Math.abs(currentY - y) <= THRESHHOLD) {
+				break;
+			}
+		}
+		
+
 	}
 	
 	
 	public static void turnTo (double theta){
-		
 	
-		
 		Lab3.leftMotor.setSpeed(ROTATE_SPEED);
 		Lab3.rightMotor.setSpeed(ROTATE_SPEED);
 		
 		
-			Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), true);
-			Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), false);
-			
-		
-		
+		Lab3.leftMotor.rotate(convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), true);
+		Lab3.rightMotor.rotate(-convertAngle(Lab3.WHEEL_RADIUS, Lab3.TRACK, theta), false);
 		
 	}
 	
 	
-	private static int convertDistance(double radius, double distance) {
+	public static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
