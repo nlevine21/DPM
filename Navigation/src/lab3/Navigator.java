@@ -8,7 +8,7 @@ public class Navigator extends Thread{
 	//Constants
 	private static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
-	private static final int THRESHOLD = 2;
+	private static final double THRESHOLD = 1.5;
 
 	public static void drive(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			double leftRadius, double rightRadius, double width) {
