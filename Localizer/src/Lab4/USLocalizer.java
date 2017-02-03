@@ -1,160 +1,149 @@
 package Lab4;
 
-
-import lejos.robotics.SampleProvider;
 import lejos.hardware.Sound;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.robotics.SampleProvider;
+import lejos.utility.Delay;
 
 public class USLocalizer {
 	public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
-	public static int ROTATION_SPEED = 75;
-
+	public static float ROTATION_SPEED = 120;
 	
+	private static final int LEEWAY	= 33; // leeway in the reading of the US 
 
 	private Odometer odo;
 	private SampleProvider usSensor;
 	private float[] usData;
 	private LocalizationType locType;
-
+	public Navigation nav; // Initialize navigation object
+	
 	public USLocalizer(Odometer odo,  SampleProvider usSensor, float[] usData, LocalizationType locType) {
 		this.odo = odo;
 		this.usSensor = usSensor;
 		this.usData = usData;
 		this.locType = locType;
+		nav = new Navigation(this.odo);
 	}
 	
-	
 	public void doLocalization() {
-		double [] pos = new double [3];
-		double angleA, angleB;
-		double anglePrime = 0;
-		double angleTemp=0;
+		double angleA, angleB; // variable for agnle b
+		double actualAng = 0; // the actual angle of the robot used at the end to position robot 
 		
 		if (locType == LocalizationType.FALLING_EDGE) {
+			
 			// rotate the robot until it sees no wall
-			
-			if ((getFilteredData()*100) < 40){
-				
-		RotateLock(180);
-	
-				
+			while(getFilteredData() < LEEWAY){
+				rightTurn();
 			}
+			Delay.msDelay(1000);// Delay to avoid getting bad readings from the sensor
 			
-			// Store the initial angle of the odometer.
-			angleTemp = odo.getAng();
+			//Rotate robot untill a wall is seen
+			while (getFilteredData() >= LEEWAY){	
+				rightTurn();
+			}
+			angleA = odo.getAng(); // latch the angle
+			nav.setSpeeds(0, 0);//stop the robto
+			Delay.msDelay(1000);// avoid getting bad readings from the sensor
 			
-			//Start rotating through 360 degrees.	
-				Rotate (359);
-				Sound.beep();
-				
-			// Stop the motors when it senses a wall. Break out of the loop.
-				while (true){
-				
-				if ((getFilteredData()*100) < 40) {
-					
-					Lab4.leftMotor.stop();
-					Lab4.rightMotor.stop();
-					Sound.beepSequenceUp();;
-					break;
-
-					}}
-	
-			
-		 //Calculate the angle the robot went through.
-		
-			anglePrime = odo.getAng() - angleTemp;
-			
-			
-		//Rotate the robot back to its position before the first wall chack.
-			
-		RotateLock(-anglePrime);
-		Sound.beep();
-			
-	
-				// Rotate through 360 degrees in the opposite direction.
-				Rotate(-359);
-				
-				//Stop the motors when it senses a wall. Break out of the loop.
-				while (true){
-					
-					if ((getFilteredData()*100) < 40) {
-						
-						Lab4.leftMotor.stop();
-						Lab4.rightMotor.stop();
-						Sound.beepSequenceUp();
-						break;
-
-						}}
+			// switch direction and wait until it sees no wall
+			while(getFilteredData() < LEEWAY){
+				leftTurn();
+			}
+			Delay.msDelay(1000); // delay to avoid getting bad readings
 			
 			// keep rotating until the robot sees a wall, then latch the angle
-		
+			while (getFilteredData() >= LEEWAY){
+				leftTurn();
+			}
+			nav.setSpeeds(0, 0); // stop the robot
+			angleB = odo.getAng(); // latch the angle
+			Delay.msDelay(1000);
 			
 			// angleA is clockwise from angleB, so assume the average of the
 			// angles to the right of angleB is 45 degrees past 'north'
 			
-			// update the odometer position (example to follow:)
-			odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
-		} else {
-			//
-			// The robot should turn until it sees the wall, then look for the
-			 // "rising edges:" the points where it no longer sees the wall.
-			 //This is very similar to the FALLING_EDGE routine, but the robot
-			 //will face toward the wall for most of it.
-			 //
 			
-			//
-			// FILL THIS IN
-			//
-		} 
-	} 
+			actualAng = calcHeading(angleA,angleB) + odo.getAng(); // get the actual angle of the robot
+			// update the odometer position
+			odo.setPosition(new double [] {0.0, 0.0, actualAng}, new boolean [] {true, true, true});
+			nav.turnTo(0, true); // turn to 0
+			
+		} else {
+			/*
+			 * The robot should turn until it sees the wall, then look for the
+			 * "rising edges:" the points where it no longer sees the wall.
+			 * This is very similar to the FALLING_EDGE routine, but the robot
+			 * will face toward the wall for most of it.
+			 */
+			
+			// rotate the robot until it sees  wall
+			
+			while(getFilteredData() > LEEWAY){
+				rightTurn();
+			}
+			Delay.msDelay(1000);
+						
+			// keep rotating until the robot sees a no wall, then latch the angle
+			while (getFilteredData() <= LEEWAY){
+				rightTurn();
+			}
+						
+			angleA = odo.getAng();
+			nav.setSpeeds(0, 0);
+			Delay.msDelay(1000);
+			// switch direction and wait until it sees wall
+						
+			while(getFilteredData() > LEEWAY){
+				leftTurn();
+			}
+			Delay.msDelay(1000);
+			
+			// keep rotating until the robot sees no wall, then latch the angle
+			while (getFilteredData() <= LEEWAY){
+				leftTurn();
+			}
+			nav.setSpeeds(0, 0);
+			angleB = odo.getAng();
+			Delay.msDelay(1000);
+						
+			// angleA is clockwise from angleB, so assume the average of the
+			// angles to the right of angleB is 45 degrees past 'north'
+						
+						
+			actualAng = calcHeading(angleB,angleA) + odo.getAng();
+			// update the odometer position (example to follow:)
+			odo.setPosition(new double [] {0.0, 0.0, actualAng}, new boolean [] {true, true, true});
+			//nav.setSpeeds(ROTATION_SPEED, ROTATION_SPEED);
+			nav.turnTo(0, true);
+		}
+	}
 	
-
-	private float getFilteredData() {
+	private float getFilteredData() { // filter the data 
 		usSensor.fetchSample(usData, 0);
-		float distance = usData[0];
-				
+		float distance = usData[0] * 100;
+		
+		if (distance >= 50){
+			distance = 50;
+		}
 		return distance;
 	}
+	
+	private  void leftTurn(){ // rotate left
+		nav.setSpeeds(-ROTATION_SPEED, ROTATION_SPEED);
+	}
 
-	
-public static void RotateLock (double theta){
-		
-		Lab4.leftMotor.setSpeed(ROTATION_SPEED);
-		Lab4.rightMotor.setSpeed(ROTATION_SPEED);
-		Lab4.leftMotor.setAcceleration(70);
-		Lab4.leftMotor.setAcceleration(70);
-		
-		
-		
-		
-		Lab4.leftMotor.rotate(convertAngle(Lab4.WHEEL_RADIUS, Lab4.TRACK, theta), true);
-		Lab4.rightMotor.rotate(-convertAngle(Lab4.WHEEL_RADIUS, Lab4.TRACK, theta), false);
-		
+	private  void rightTurn(){ // rotate right
+		nav.setSpeeds(ROTATION_SPEED, -ROTATION_SPEED);
 	}
 	
-	
-	public static void Rotate (double theta){
+	private static double calcHeading(double angleA, double angleB){ // calculation of heading as shown in the tutorial
 		
-		Lab4.leftMotor.setSpeed(ROTATION_SPEED);
-		Lab4.rightMotor.setSpeed(ROTATION_SPEED);
-		Lab4.leftMotor.setAcceleration(70);
-		Lab4.leftMotor.setAcceleration(70);
-
+		double heading;
 		
-		
-		
-		Lab4.leftMotor.rotate(convertAngle(Lab4.WHEEL_RADIUS, Lab4.TRACK, theta), true);
-		Lab4.rightMotor.rotate(-convertAngle(Lab4.WHEEL_RADIUS, Lab4.TRACK, theta), true);
-		
+		if (angleA < angleB){
+			heading = 45 - (angleA + angleB) /2 ;
+		}else {
+			heading = 225 - (angleA + angleB) /2 ;	
+		}
+		return heading;
 	}
-	
-	private static int convertAngle(double radius, double width, double angle) {
-		return convertDistance(radius, Math.PI * width * angle / 360.0);
-	}
-	
-	public static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
-	}
-	
-
 }
