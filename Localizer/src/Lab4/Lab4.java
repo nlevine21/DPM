@@ -52,7 +52,7 @@ public class Lab4 {
 		LCDInfo lcd = new LCDInfo(odo);
 		
 		// perform the ultrasonic localization
-		USLocalizer usl = new USLocalizer(odo, usValue, usData, USLocalizer.LocalizationType.FALLING_EDGE);
+		USLocalizer usl = new USLocalizer(odo, usValue, usData);
 		usl.doLocalization();
 		
 		// perform the light sensor localization

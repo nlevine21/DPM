@@ -5,116 +5,60 @@ import lejos.robotics.SampleProvider;
 import lejos.utility.Delay;
 
 public class USLocalizer {
-	public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
 	public static float ROTATION_SPEED = 120;
 	
-	private static final int LEEWAY	= 33; // leeway in the reading of the US 
+	private static final int WALL_DIST	= 33; // WALL_DIST in the reading of the US 
 
 	private Odometer odo;
 	private SampleProvider usSensor;
 	private float[] usData;
-	private LocalizationType locType;
-	public Navigation nav; // Initialize navigation object
+	public Navigation nav;
 	
-	public USLocalizer(Odometer odo,  SampleProvider usSensor, float[] usData, LocalizationType locType) {
+	public USLocalizer(Odometer odo,  SampleProvider usSensor, float[] usData) {
 		this.odo = odo;
 		this.usSensor = usSensor;
 		this.usData = usData;
-		this.locType = locType;
-		nav = new Navigation(this.odo);
+		nav = new Navigation(this.odo);  // Initialize navigation object
 	}
 	
 	public void doLocalization() {
-		double angleA, angleB; // variable for agnle b
-		double actualAng = 0; // the actual angle of the robot used at the end to position robot 
+		double angleA, angleB; 
+		double actualAng = 0; 
 		
-		if (locType == LocalizationType.FALLING_EDGE) {
-			
-			// rotate the robot until it sees no wall
-			while(getFilteredData() < LEEWAY){
+
+			while(!seesWall()){
 				rightTurn();
 			}
-			Delay.msDelay(1000);// Delay to avoid getting bad readings from the sensor
+			delay();
 			
-			//Rotate robot untill a wall is seen
-			while (getFilteredData() >= LEEWAY){	
+		
+			while (seesWall()){	
 				rightTurn();
 			}
-			angleA = odo.getAng(); // latch the angle
-			nav.setSpeeds(0, 0);//stop the robto
-			Delay.msDelay(1000);// avoid getting bad readings from the sensor
 			
-			// switch direction and wait until it sees no wall
-			while(getFilteredData() < LEEWAY){
-				leftTurn();
-			}
-			Delay.msDelay(1000); // delay to avoid getting bad readings
-			
-			// keep rotating until the robot sees a wall, then latch the angle
-			while (getFilteredData() >= LEEWAY){
-				leftTurn();
-			}
-			nav.setSpeeds(0, 0); // stop the robot
-			angleB = odo.getAng(); // latch the angle
-			Delay.msDelay(1000);
-			
-			// angleA is clockwise from angleB, so assume the average of the
-			// angles to the right of angleB is 45 degrees past 'north'
-			
-			
-			actualAng = calcHeading(angleA,angleB) + odo.getAng(); // get the actual angle of the robot
-			// update the odometer position
-			odo.setPosition(new double [] {0.0, 0.0, actualAng}, new boolean [] {true, true, true});
-			nav.turnTo(0, true); // turn to 0
-			
-		} else {
-			/*
-			 * The robot should turn until it sees the wall, then look for the
-			 * "rising edges:" the points where it no longer sees the wall.
-			 * This is very similar to the FALLING_EDGE routine, but the robot
-			 * will face toward the wall for most of it.
-			 */
-			
-			// rotate the robot until it sees  wall
-			
-			while(getFilteredData() > LEEWAY){
-				rightTurn();
-			}
-			Delay.msDelay(1000);
-						
-			// keep rotating until the robot sees a no wall, then latch the angle
-			while (getFilteredData() <= LEEWAY){
-				rightTurn();
-			}
-						
-			angleA = odo.getAng();
+			angleA = odo.getAng(); 
 			nav.setSpeeds(0, 0);
-			Delay.msDelay(1000);
-			// switch direction and wait until it sees wall
-						
-			while(getFilteredData() > LEEWAY){
+			delay();
+		
+			while(!seesWall()){
 				leftTurn();
 			}
-			Delay.msDelay(1000);
 			
-			// keep rotating until the robot sees no wall, then latch the angle
-			while (getFilteredData() <= LEEWAY){
+			delay(); 
+			
+			
+			while (seesWall()){
 				leftTurn();
 			}
-			nav.setSpeeds(0, 0);
-			angleB = odo.getAng();
-			Delay.msDelay(1000);
-						
-			// angleA is clockwise from angleB, so assume the average of the
-			// angles to the right of angleB is 45 degrees past 'north'
-						
-						
-			actualAng = calcHeading(angleB,angleA) + odo.getAng();
-			// update the odometer position (example to follow:)
+			nav.setSpeeds(0, 0); 
+			angleB = odo.getAng(); 
+			delay();
+			
+			actualAng = calcHeading(angleA,angleB) + odo.getAng(); 
 			odo.setPosition(new double [] {0.0, 0.0, actualAng}, new boolean [] {true, true, true});
-			//nav.setSpeeds(ROTATION_SPEED, ROTATION_SPEED);
-			nav.turnTo(0, true);
-		}
+			nav.turnTo(0, true); 
+			
+		
 	}
 	
 	private float getFilteredData() { // filter the data 
@@ -135,6 +79,13 @@ public class USLocalizer {
 		nav.setSpeeds(ROTATION_SPEED, -ROTATION_SPEED);
 	}
 	
+	private boolean seesWall() {
+		return getFilteredData() >= WALL_DIST;
+	}
+	
+	private void delay() {
+		Delay.msDelay(1000);
+	}
 	private static double calcHeading(double angleA, double angleB){ // calculation of heading as shown in the tutorial
 		
 		double heading;
