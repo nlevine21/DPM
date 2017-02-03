@@ -115,11 +115,21 @@ public class Navigation {
 		}
 	}
 	
-	/*
-	 * Go foward a set distance in cm
-	 */
-	public void goForward(double distance) {
-		this.travelTo(Math.cos(Math.toRadians(this.odometer.getAng())) * distance, Math.cos(Math.toRadians(this.odometer.getAng())) * distance);
 
+	
+	public void goForward(double distance) {
+		if (distance < 0) {
+			this.setSpeeds(-FAST, -FAST);
+		}
+		else {
+			this.setSpeeds(FAST,FAST);
+		}
+		
+		leftMotor.rotate(convertDistance(Lab4.WHEEL_RADIUS, distance), true);
+		rightMotor.rotate(convertDistance(Lab4.WHEEL_RADIUS, distance), false);
+	}
+	
+	private static int convertDistance(double radius, double distance) {
+		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 }

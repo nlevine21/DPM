@@ -29,9 +29,9 @@ public class USLocalizer {
 			while(!seesWall()){
 				rightTurn();
 			}
+			
 			delay();
 			
-		
 			while (seesWall()){	
 				rightTurn();
 			}
@@ -50,6 +50,8 @@ public class USLocalizer {
 			while (seesWall()){
 				leftTurn();
 			}
+			
+			
 			nav.setSpeeds(0, 0); 
 			angleB = odo.getAng(); 
 			delay();
