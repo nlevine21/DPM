@@ -36,15 +36,17 @@ public class USLocalizer {
 			if ((getFilteredData()*100) < 40){
 				
 		RotateLock(180);
-	
-				
+		
+		
 			}
+			
+			odo.setPosition(new double [] {0,0,0}, new boolean[] {true,true,true});
 			
 			// Store the initial angle of the odometer.
 			angleTemp = odo.getAng();
 			
 			//Start rotating through 360 degrees.	
-				Rotate (359);
+				Rotate (-359);
 				Sound.beep();
 				
 			// Stop the motors when it senses a wall. Break out of the loop.
@@ -67,12 +69,18 @@ public class USLocalizer {
 			
 		//Rotate the robot back to its position before the first wall chack.
 			
-		RotateLock(-anglePrime);
+		
+		RotateLock(anglePrime);
+		
+		System.out.println("angleprime " + anglePrime);
+
+		
+		
 		Sound.beep();
 			
 	
 				// Rotate through 360 degrees in the opposite direction.
-				Rotate(-359);
+				Rotate(359);
 				
 				//Stop the motors when it senses a wall. Break out of the loop.
 				while (true){
@@ -81,7 +89,7 @@ public class USLocalizer {
 						
 						Lab4.leftMotor.stop();
 						Lab4.rightMotor.stop();
-						Sound.beepSequenceUp();
+						Sound.beepSequenceUp();	
 						break;
 
 						}}
@@ -121,8 +129,7 @@ public static void RotateLock (double theta){
 		
 		Lab4.leftMotor.setSpeed(ROTATION_SPEED);
 		Lab4.rightMotor.setSpeed(ROTATION_SPEED);
-		Lab4.leftMotor.setAcceleration(70);
-		Lab4.leftMotor.setAcceleration(70);
+	
 		
 		
 		
@@ -137,8 +144,7 @@ public static void RotateLock (double theta){
 		
 		Lab4.leftMotor.setSpeed(ROTATION_SPEED);
 		Lab4.rightMotor.setSpeed(ROTATION_SPEED);
-		Lab4.leftMotor.setAcceleration(70);
-		Lab4.leftMotor.setAcceleration(70);
+		
 
 		
 		
