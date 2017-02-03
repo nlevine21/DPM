@@ -27,7 +27,7 @@ public class Lab4 {
 	
 	
 	public static void main(String[] args) {
-		
+		 
 		//Setup ultrasonic sensor
 		// 1. Create a port object attached to a physical port (done above)
 		// 2. Create a sensor instance and attach to port

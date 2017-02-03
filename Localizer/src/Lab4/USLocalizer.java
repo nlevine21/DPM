@@ -36,23 +36,14 @@ public class USLocalizer {
 			}
 			Delay.msDelay(1000);// Delay to avoid getting bad readings from the sensor
 			
-<<<<<<< HEAD
 			//Rotate robot untill a wall is seen
 			while (getFilteredData() >= LEEWAY){	
 				rightTurn();
-=======
-			if ((getFilteredData()*100) < 40){
-				
-		RotateLock(180);
-		
-		
->>>>>>> 6654d8094a1fc2fda5ed8d48da13a11b8ede47d2
 			}
 			angleA = odo.getAng(); // latch the angle
 			nav.setSpeeds(0, 0);//stop the robto
 			Delay.msDelay(1000);// avoid getting bad readings from the sensor
 			
-<<<<<<< HEAD
 			// switch direction and wait until it sees no wall
 			while(getFilteredData() < LEEWAY){
 				leftTurn();
@@ -66,29 +57,6 @@ public class USLocalizer {
 			nav.setSpeeds(0, 0); // stop the robot
 			angleB = odo.getAng(); // latch the angle
 			Delay.msDelay(1000);
-=======
-			odo.setPosition(new double [] {0,0,0}, new boolean[] {true,true,true});
-			
-			// Store the initial angle of the odometer.
-			angleTemp = odo.getAng();
-			
-			//Start rotating through 360 degrees.	
-				Rotate (-359);
-				Sound.beep();
-				
-			// Stop the motors when it senses a wall. Break out of the loop.
-				while (true){
-				
-				if ((getFilteredData()*100) < 40) {
-					
-					Lab4.leftMotor.stop();
-					Lab4.rightMotor.stop();
-					Sound.beepSequenceUp();;
-					break;
-
-					}}
-	
->>>>>>> 6654d8094a1fc2fda5ed8d48da13a11b8ede47d2
 			
 			// angleA is clockwise from angleB, so assume the average of the
 			// angles to the right of angleB is 45 degrees past 'north'
@@ -99,7 +67,6 @@ public class USLocalizer {
 			odo.setPosition(new double [] {0.0, 0.0, actualAng}, new boolean [] {true, true, true});
 			nav.turnTo(0, true); // turn to 0
 			
-<<<<<<< HEAD
 		} else {
 			/*
 			 * The robot should turn until it sees the wall, then look for the
@@ -109,32 +76,6 @@ public class USLocalizer {
 			 */
 			
 			// rotate the robot until it sees  wall
-=======
-		
-		RotateLock(anglePrime);
-		
-		System.out.println("angleprime " + anglePrime);
-
-		
-		
-		Sound.beep();
-			
-	
-				// Rotate through 360 degrees in the opposite direction.
-				Rotate(359);
-				
-				//Stop the motors when it senses a wall. Break out of the loop.
-				while (true){
-					
-					if ((getFilteredData()*100) < 40) {
-						
-						Lab4.leftMotor.stop();
-						Lab4.rightMotor.stop();
-						Sound.beepSequenceUp();	
-						break;
-
-						}}
->>>>>>> 6654d8094a1fc2fda5ed8d48da13a11b8ede47d2
 			
 			while(getFilteredData() > LEEWAY){
 				rightTurn();
@@ -186,32 +127,9 @@ public class USLocalizer {
 		return distance;
 	}
 	
-<<<<<<< HEAD
 	private  void leftTurn(){ // rotate left
 		nav.setSpeeds(-ROTATION_SPEED, ROTATION_SPEED);
 	}
-=======
-public static void RotateLock (double theta){
-		
-		Lab4.leftMotor.setSpeed(ROTATION_SPEED);
-		Lab4.rightMotor.setSpeed(ROTATION_SPEED);
-	
-		
-		
-		
-		
-		Lab4.leftMotor.rotate(convertAngle(Lab4.WHEEL_RADIUS, Lab4.TRACK, theta), true);
-		Lab4.rightMotor.rotate(-convertAngle(Lab4.WHEEL_RADIUS, Lab4.TRACK, theta), false);
-		
-	}
-	
-	
-	public static void Rotate (double theta){
-		
-		Lab4.leftMotor.setSpeed(ROTATION_SPEED);
-		Lab4.rightMotor.setSpeed(ROTATION_SPEED);
-		
->>>>>>> 6654d8094a1fc2fda5ed8d48da13a11b8ede47d2
 
 	private  void rightTurn(){ // rotate right
 		nav.setSpeeds(ROTATION_SPEED, -ROTATION_SPEED);
