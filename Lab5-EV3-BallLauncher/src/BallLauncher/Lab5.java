@@ -22,6 +22,7 @@ public class Lab5 {
 	private static final int ROTATE_SPEED = 100;
 	private static final int ACCELERATION = 3000;
 	private static final int LAUNCH_ANGLE = 125;
+	private static final int INITIAL_ANGLE = 40;
 	private static final double WHEEL_RADIUS = 2.05;
 	private static final double TRACK = 16.7;
 	private static final double TURN_ANGLE = 18.435;
@@ -29,18 +30,24 @@ public class Lab5 {
 	
 	
 	
+	
 
 	public static void main(String[] args) {
-			
+		
+		//Rotate the motors forward to prepare for launch
+		topMotor.rotate(-INITIAL_ANGLE, true);
+		topMotor2.rotate(-INITIAL_ANGLE, false);
+		
 		while (true) {
 			
 			int buttonChoice = 0;
 			
+			//Get the button choice from the user
 			do {
 				// clear the display
 				t.clear();
 
-				// ask the user whether the motors should drive in a square or float
+				// ask the user where the target is 
 				t.drawString("< Left | Right >", 0, 0);
 				t.drawString("       |        ", 0, 1);
 				t.drawString(" ______|_______ ", 0, 2);
@@ -48,14 +55,17 @@ public class Lab5 {
 				t.drawString("       Up       ", 0, 4);
 
 				buttonChoice = Button.waitForAnyPress();
+				
+				//If the escape button is pressed, exit the program
 				if (buttonChoice == Button.ID_ESCAPE) {
 					System.exit(0);
 				}
+				
 			} while (buttonChoice == 0);
 			
-			//Lock both of the top motors to prepare for the launch 
+			//Lock both of the top motors to prepare for the launch
 			topMotor.stop();
-			topMotor.stop();
+			topMotor2.stop();
 			
 		
 			//If the left button is pressed, the target is on the left
@@ -92,6 +102,7 @@ public class Lab5 {
 				
 			}
 			
+			
 		}
 	}
 
@@ -107,9 +118,11 @@ public class Lab5 {
 			topMotor.setSpeed(topMotor.getMaxSpeed());
 			topMotor2.setSpeed(topMotor2.getMaxSpeed());
 			
-			//Rotate the top motors back and then forward to launch the ball
+			//Rotate the top motors forward to launch ball
 			topMotor.rotate(-LAUNCH_ANGLE, true);
 			topMotor2.rotate(-LAUNCH_ANGLE, false);
+			
+			//Rotate the top motors back to the initial orientation
 			topMotor.rotate(LAUNCH_ANGLE,true);
 			topMotor2.rotate(LAUNCH_ANGLE,false);
 			
